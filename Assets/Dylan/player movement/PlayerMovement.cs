@@ -1,8 +1,4 @@
 using System;
-using System.Collections;
-using System.Net;
-using System.Runtime.CompilerServices;
-using UnityEditor.UI;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -157,6 +153,8 @@ public class PlayerMovement : MonoBehaviour
         rb.AddForce(appliedAcceleration * xForce); // movement acceleration
         rb.linearVelocityX = Mathf.Clamp(rb.linearVelocityX, -maxSpeed, maxSpeed); // clamp speed  
 
+
+
         // --------------------------------------------- //
         // if unable to jump or not on the wall, store velocities
         if (!isOnWall && wallCoyoteTime.IsReady())
@@ -222,8 +220,8 @@ public class PlayerMovement : MonoBehaviour
 
         xForce = new Vector2(xInput, 0);
 
-        // crouching
-        if (ctx.ReadValue<Vector2>().y < 0)
+        // crouching (below a certain threshold so controllers crouch on slight imperfections)
+        if (ctx.ReadValue<Vector2>().y < 0.5f)
         {
             isCrouching = true;
         }
