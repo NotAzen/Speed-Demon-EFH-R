@@ -196,7 +196,7 @@ public class PlayerMovement : MonoBehaviour
     {
         // cast thin box at the player's feet and verify the hit normal points upwards
         Vector2 origin = (Vector2)transform.position + playerCollider.offset + playerCollider.bounds.size.y / 2f * Vector2.down;
-        Vector2 boxSize = new(playerCollider.bounds.size.x * 0.9f, 0.02f);
+        Vector2 boxSize = new(playerCollider.bounds.size.x * 0.9f, 0.05f);
 
         RaycastHit2D hit = Physics2D.BoxCast(origin, boxSize, 0, Vector2.down, 0, LayerMask.GetMask("Ground"));
         return hit.collider != null && hit.normal.y > 0.65f;
@@ -206,9 +206,10 @@ public class PlayerMovement : MonoBehaviour
     {
         // cast box slightly from player's feet
         Vector2 origin = (Vector2)transform.position + playerCollider.offset + playerCollider.bounds.size.x / 2f * Vector2.left;
-        Vector2 boxSize = new(0.02f, 0.9f * playerCollider.bounds.size.y);
+        Vector2 boxSize = new(0.05f, 0.9f * playerCollider.bounds.size.y);
 
-        return Physics2D.BoxCast(origin, boxSize, 0, Vector2.right, playerCollider.bounds.size.x, LayerMask.GetMask("Ground"));
+        RaycastHit2D hit = Physics2D.BoxCast(origin, boxSize, 0, Vector2.right, playerCollider.bounds.size.x, LayerMask.GetMask("Ground"));
+        return hit.collider != null && Mathf.Abs(hit.normal.x) > 0.65f;
     }
 
     public void OnMove(InputAction.CallbackContext ctx)
@@ -221,7 +222,7 @@ public class PlayerMovement : MonoBehaviour
         xForce = new Vector2(xInput, 0);
 
         // crouching (below a certain threshold so controllers crouch on slight imperfections)
-        if (ctx.ReadValue<Vector2>().y < 0.5f)
+        if (Vector2.Dot(Vector2.up, ctx.ReadValue<Vector2>().normalized) < -0.5f)
         {
             isCrouching = true;
         }
@@ -237,5 +238,15 @@ public class PlayerMovement : MonoBehaviour
         if (!ctx.performed) return;
 
         bufferTime.Trigger();
+    }
+
+    private void OnDrawGizmos()
+    {
+        // cast thin box at the player's feet and verify the hit normal points upwards
+        Vector2 origin = (Vector2)transform.position + playerCollider.offset + playerCollider.bounds.size.y / 2f * Vector2.down;
+        Vector2 boxSize = new(playerCollider.bounds.size.x * 0.9f, 0.02f);
+
+        // draw the boxcast for debugging purposes
+        Gizmos.DrawCube(origin, boxSize);
     }
 }
